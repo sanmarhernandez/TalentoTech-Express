@@ -1,7 +1,7 @@
 //Configuracion de express
 const express = require("express")//Importando la libreria
 const app = express() //inicializamos la variable de lalibreria
-const port = 3000 // Definimps el puerto a usar
+const port = 3000 // Definimos el puerto a usar
 
 const mongoose =require('mongoose');// importa libreria mongoose
 
@@ -13,8 +13,14 @@ mongoose.connect(DB_CONNECTION)//creo la cadena de conexin
 //Importamos las rutas del otro archivo
 app.use(express.urlencoded({extended: true}))//Acceder a la informacion de las urls
 app.use(express.json())//analizar informacion en formato JSON
+
 const UserRoutes = require('./routes/UserRoutes')
 app.use('/', UserRoutes)
+
+
+
+const CarroRoutes =require('./routes/CarroRoutes')
+app.use('/', CarroRoutes)
 
 
 //Creando el servicio Web

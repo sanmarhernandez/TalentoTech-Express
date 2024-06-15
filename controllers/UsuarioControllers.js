@@ -1,5 +1,6 @@
 const UserSchema = require("../models/usuario") // Accdemos a los datos del modelo
 const bcrypt =require('bcrypt')// importamos la libreria de encriptacion
+const jwt = require('jsonwebtoken')
 
 //permite agrupar atributos y funciones
 class UsuarioController {
@@ -40,12 +41,13 @@ class UsuarioController {
     async updateUsuario(req, res){
 
         var id = req.params.id;
+        const hashedPassword = await bcrypt.hash(req.body.password)
 
         var updateUser = {
             nombre: req.body.nombre,
             apellidos: req.body.apellidos,
             correo: req.body.correo,
-            password: req.body.password,
+            password: hashedPassword,
 
         }
         await UserSchema.findByIdAndUpdate(id, updateUser, { new: true})
@@ -65,6 +67,37 @@ class UsuarioController {
 
         res.json({"status": "success", "message":"Usuario eliminado correctamente" })
 
+    }
+
+    async login(req, res){
+        //capturo el correo y la contraseña ingresados
+        var correo = req.body.correo;
+        var password =req.body.password
+
+        //Buscar el usuario por el correo
+        var usuario = await UserSchema.findOne({correo})
+        if (usuario){
+            //comparar la contraseña ingresada con la registrada por el usuario
+                                                //Ingresp             Almacenado [encriptado]
+            var verificacionClave = await bcrypt.compare(password, usuario.password)
+            //si la verificacion de la clave es exitosa
+            if(verificacionClave){
+                 // Creo un token con la informacion codificada del usuario
+
+                usuario.password = null // para no mandar la contraseña en el token
+                const token = jwt.sign({usuario}, 'secret',{expiresIn: '1h'})
+                res.send({"status": "success",
+                           "message": "Bienvenido" + usuario.nombre+ " " + usuario.apellidos,
+                           "user_id": usuario._id,
+                           "token": token
+                     })
+            }else{
+                res.status(401).send({"status": "error", "message": "Datos invalidos"})
+            }                                      
+        }else{
+            //cuando el correo ingresado no esta registrado
+            res.status(401).send({"status": "error", "message": "El correo ingresado no existe"})
+        }
     }
 
 }
