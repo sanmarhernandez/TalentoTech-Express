@@ -41,7 +41,7 @@ class UsuarioController {
     async updateUsuario(req, res){
 
         var id = req.params.id;
-        const hashedPassword = await bcrypt.hash(req.body.password)
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
 
         var updateUser = {
             nombre: req.body.nombre,
@@ -57,7 +57,7 @@ class UsuarioController {
             res.send({ "status": "error", "message": error.message})
         })
 
-        res.json({"status": "success","message": "Usuario actualizado correctamente "})
+        
     }
 
     async deleteUsuario(req, res){
